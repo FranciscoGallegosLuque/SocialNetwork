@@ -5,32 +5,12 @@
 //  Created by Francisco Manuel Gallegos Luque on 19/02/2025.
 //
 
+import SwiftData
 import SwiftUI
 
-struct User: Codable, Identifiable, Hashable {
-    
-    struct Friend: Codable, Identifiable, Hashable {
-        let id: UUID
-        let name: String
-    }
-    
-    let id: UUID
-    let isActive: Bool
-    let name: String
-    let age: Int
-    let company: String
-    let email: String
-    let address: String
-    let about: String
-    let registered: Date
-    let tags: [String]
-    let friends: [Friend]
-}
-
-
-
 struct ContentView: View {
-    @State private var users = [User]()
+    @Environment(\.modelContext) var modelContext
+    @Query var users: [User]
     
     var body: some View {
         NavigationStack {
@@ -70,7 +50,9 @@ struct ContentView: View {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             if let decodedResponse = try? decoder.decode([User].self, from: data) {
-                users = decodedResponse
+                for user in decodedResponse {
+                    modelContext.insert(user)
+                }
             }
         } catch {
             print("Invalid code")
